@@ -6,6 +6,7 @@ import modelo.Campeon;
 import validacion.Rechazo;
 import validacion.ValidadorCampeon;
 
+import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -161,6 +162,67 @@ public class CampeonDao {
         } catch (SQLException e) {
             throw ErrorBaseDatos.desde(e, "el campeón " + id + " (aparece en partidas)");
         }
+    }
+
+    // ---------- Procedimiento almacenado ----------
+
+    /**
+     * Llama al procedimiento renombrar_campeon de la base (sql/procedimiento.sql).
+     * La lógica (nombre no vacío, campeón existente) está DENTRO de la base, no aquí.
+     * Con autocommit activado, el cambio queda confirmado al terminar la llamada.
+     */
+    public void renombrar(String id, String nombreNuevo) throws ErrorBaseDatos {
+        try (Connection con = conexiones.abrir();
+             CallableStatement cs = con.prepareCall("CALL renombrar_campeon(?, ?)")) {
+            cs.setString(1, id);
+            cs.setString(2, nombreNuevo);
+            cs.execute();
+        } catch (SQLException e) {
+            throw errorProcedimiento(e, id);
+        }
+    }
+
+    /**
+     * Prueba de reversión: llama al procedimiento DENTRO de una transacción, lee el nombre
+     * en esa misma transacción (ya cambiado) y hace rollback. El procedimiento no confirma
+     * por su cuenta, así que el cambio desaparece.
+     * @return el nombre que se veía dentro de la transacción, antes del rollback
+     */
+    public String renombrarYRevertir(String id, String nombreNuevo) throws ErrorBaseDatos {
+        try (Connection con = conexiones.abrir()) {
+            con.setAutoCommit(false);
+            try {
+                try (CallableStatement cs = con.prepareCall("CALL renombrar_campeon(?, ?)")) {
+                    cs.setString(1, id);
+                    cs.setString(2, nombreNuevo);
+                    cs.execute();
+                }
+                String dentro;
+                try (PreparedStatement ps = con.prepareStatement("SELECT nombre FROM campeon WHERE id_campeon = ?")) {
+                    ps.setString(1, id);
+                    try (ResultSet rs = ps.executeQuery()) {
+                        rs.next();
+                        dentro = rs.getString(1);
+                    }
+                }
+                return dentro;
+            } finally {
+                con.rollback();   // siempre: es una prueba de reversión
+            }
+        } catch (SQLException e) {
+            throw errorProcedimiento(e, id);
+        }
+    }
+
+    /** Los RAISE EXCEPTION del procedimiento llegan como SQLState propios. */
+    private static ErrorBaseDatos errorProcedimiento(SQLException e, String id) {
+        return switch (e.getSQLState() == null ? "" : e.getSQLState()) {
+            case "P0002" -> new ErrorBaseDatos("No existe el campeón " + id + ": el procedimiento no ha cambiado nada.", e);
+            case "22023" -> new ErrorBaseDatos("El procedimiento rechaza el nombre: no puede estar vacío.", e);
+            case "42883" -> new ErrorBaseDatos("El procedimiento renombrar_campeon no existe en la base: "
+                    + "aplica sql/procedimiento.sql.", e);
+            default -> ErrorBaseDatos.desde(e, "la llamada a renombrar_campeon");
+        };
     }
 
     // ---------- Conversión fila -> modelo ----------

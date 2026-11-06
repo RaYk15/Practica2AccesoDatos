@@ -1,0 +1,25 @@
+[
+  {
+    "servidor": "EUW",
+    "idPartida": "P001",
+    "fecha": "2026-10-01",
+    "duracionMin": 23,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "DAR", "kills": 5, "deaths": 5, "assists": 9},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 6, "deaths": 9, "assists": 5},
+        {"jugador": "Íñigo", "campeonId": "YAS", "kills": 0, "deaths": 5, "assists": 4},
+        {"jugador": "Marta", "campeonId": "KAI", "kills": 1, "deaths": 4, "assists": 5},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 6, "deaths": 8, "assists": 1}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 7, "deaths": 0, "assists": 18},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 11, "deaths": 2, "assists": 14},
+        {"jugador": "Sofía", "campeonId": "AHR", "kills": 5, "deaths": 5, "assists": 12},
+        {"jugador": "Jon", "campeonId": "JIN", "kills": 9, "deaths": 0, "assists": 12},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 9, "deaths": 2, "assists": 13}
+      ]
+    }
+  }
+]

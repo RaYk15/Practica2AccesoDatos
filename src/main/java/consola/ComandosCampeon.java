@@ -15,6 +15,8 @@ import java.util.Optional;
  *   campeon crear <id> <nombre> <rol> <region> <dificultad>
  *   campeon modificar <id> <nombre> <rol> <region> <dificultad>
  *   campeon borrar <id>
+ *   campeon renombrar <id> <nombre>             llama al procedimiento almacenado
+ *   campeon renombrar-revertir <id> <nombre>    lo llama dentro de una transacción y hace rollback
  * Los textos con espacios o apóstrofo van entre comillas dobles: "Kai'Sa".
  */
 public class ComandosCampeon {
@@ -35,6 +37,8 @@ public class ComandosCampeon {
                 case "crear" -> { if (args.size() != 6) return ayuda(); crear(leer(args)); }
                 case "modificar" -> { if (args.size() != 6) return ayuda(); modificar(leer(args)); }
                 case "borrar" -> { if (args.size() != 2) return ayuda(); borrar(args.get(1)); }
+                case "renombrar" -> { if (args.size() != 3) return ayuda(); renombrar(args.get(1), args.get(2)); }
+                case "renombrar-revertir" -> { if (args.size() != 3) return ayuda(); renombrarYRevertir(args.get(1), args.get(2)); }
                 default -> { return ayuda(); }
             }
             return 0;
@@ -91,6 +95,21 @@ public class ComandosCampeon {
                 : "Borrado (" + filas + " fila): " + id);
     }
 
+    private void renombrar(String id, String nombre) throws ErrorBaseDatos {
+        dao.renombrar(id, nombre);
+        System.out.println("Procedimiento ejecutado y confirmado. Lectura nueva: "
+                + dao.buscarPorClave(id).map(ComandosCampeon::formato).orElse("(no encontrado)"));
+    }
+
+    private void renombrarYRevertir(String id, String nombre) throws ErrorBaseDatos {
+        String antes = dao.buscarPorClave(id).map(Campeon::nombre).orElse("(no existe)");
+        String dentro = dao.renombrarYRevertir(id, nombre);
+        String despues = dao.buscarPorClave(id).map(Campeon::nombre).orElse("(no existe)");
+        System.out.println("  Antes:                                «" + antes + "»");
+        System.out.println("  Dentro de la transacción (sin commit): «" + dentro + "»");
+        System.out.println("  Tras el rollback (conexión nueva):     «" + despues + "»");
+    }
+
     /** crear/modificar <id> <nombre> <rol> <region> <dificultad> */
     private Campeon leer(List<String> args) {
         int dificultad;
@@ -114,6 +133,8 @@ public class ComandosCampeon {
                   campeon crear <id> <nombre> <rol> <region> <dificultad>
                   campeon modificar <id> <nombre> <rol> <region> <dificultad>
                   campeon borrar <id>
+                  campeon renombrar <id> <nombre>
+                  campeon renombrar-revertir <id> <nombre>
                 Textos con espacios o apóstrofo entre comillas dobles, por ejemplo "Kai'Sa".""");
         return 1;
     }
