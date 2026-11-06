@@ -1,0 +1,232 @@
+[
+  {
+    "servidor": "EUW",
+    "idPartida": "P001",
+    "fecha": "2026-10-01",
+    "duracionMin": 23,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "DAR", "kills": 4, "deaths": 5, "assists": 9},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 6, "deaths": 9, "assists": 5},
+        {"jugador": "Íñigo", "campeonId": "YAS", "kills": 0, "deaths": 5, "assists": 4},
+        {"jugador": "Marta", "campeonId": "KAI", "kills": 1, "deaths": 4, "assists": 5},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 6, "deaths": 8, "assists": 1}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 7, "deaths": 0, "assists": 18},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 11, "deaths": 2, "assists": 14},
+        {"jugador": "Sofía", "campeonId": "AHR", "kills": 5, "deaths": 5, "assists": 12},
+        {"jugador": "Jon", "campeonId": "JIN", "kills": 9, "deaths": 0, "assists": 12},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 9, "deaths": 2, "assists": 13}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P002",
+    "fecha": "2026-10-02",
+    "duracionMin": 37,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "GAR", "kills": 5, "deaths": 3, "assists": 7},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 5, "deaths": 3, "assists": 5},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 4, "deaths": 8, "assists": 6},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 0, "deaths": 3, "assists": 6},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 0, "deaths": 6, "assists": 5}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "DAR", "kills": 6, "deaths": 0, "assists": 12},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 4, "deaths": 2, "assists": 7},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 5, "deaths": 2, "assists": 5},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 3, "deaths": 3, "assists": 15},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 7, "deaths": 0, "assists": 15}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P003",
+    "fecha": "2026-10-03",
+    "duracionMin": 29,
+    "ganador": "azul",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "ORN", "kills": 9, "deaths": 3, "assists": 15},
+        {"jugador": "Lucía", "campeonId": "LEE", "kills": 4, "deaths": 1, "assists": 4},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 9, "deaths": 0, "assists": 15},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 11, "deaths": 0, "assists": 12},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 7, "deaths": 0, "assists": 15}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 6, "deaths": 5, "assists": 4},
+        {"jugador": "Unai", "campeonId": "NUN", "kills": 4, "deaths": 8, "assists": 6},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 4, "deaths": 7, "assists": 7},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 3, "deaths": 6, "assists": 9},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 7, "deaths": 9, "assists": 8}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P004",
+    "fecha": "2026-10-04",
+    "duracionMin": 37,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "ORN", "kills": 1, "deaths": 10, "assists": 4},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 0, "deaths": 9, "assists": 1},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 5, "deaths": 5, "assists": 4},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 1, "deaths": 3, "assists": 4},
+        {"jugador": "Aitor", "campeonId": "LUX", "kills": 7, "deaths": 10, "assists": 9}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "DAR", "kills": 6, "deaths": 3, "assists": 9},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 8, "deaths": 4, "assists": 6},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 7, "deaths": 3, "assists": 9},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 12, "deaths": 5, "assists": 12},
+        {"jugador": "Ane", "campeonId": "THR", "kills": 5, "deaths": 4, "assists": 12}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P005",
+    "fecha": "2026-10-05",
+    "duracionMin": 40,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "GAR", "kills": 4, "deaths": 5, "assists": 1},
+        {"jugador": "Lucía", "campeonId": "LEE", "kills": 0, "deaths": 7, "assists": 2},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 1, "deaths": 10, "assists": 5},
+        {"jugador": "Marta", "campeonId": "KAI", "kills": 7, "deaths": 6, "assists": 1},
+        {"jugador": "Aitor", "campeonId": "LUX", "kills": 3, "deaths": 7, "assists": 5}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "DAR", "kills": 10, "deaths": 2, "assists": 16},
+        {"jugador": "Unai", "campeonId": "NUN", "kills": 11, "deaths": 5, "assists": 15},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 12, "deaths": 1, "assists": 16},
+        {"jugador": "Jon", "campeonId": "JIN", "kills": 9, "deaths": 0, "assists": 10},
+        {"jugador": "Ane", "campeonId": "LUL", "kills": 8, "deaths": 2, "assists": 12}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P006",
+    "fecha": "2026-10-06",
+    "duracionMin": 31,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "DAR", "kills": 5, "deaths": 4, "assists": 1},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 2, "deaths": 6, "assists": 8},
+        {"jugador": "Íñigo", "campeonId": "YAS", "kills": 1, "deaths": 9, "assists": 5},
+        {"jugador": "Marta", "campeonId": "KAI", "kills": 2, "deaths": 7, "assists": 2},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 2, "deaths": 5, "assists": 10}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 7, "deaths": 2, "assists": 9},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 7, "deaths": 3, "assists": 5},
+        {"jugador": "Sofía", "campeonId": "AHR", "kills": 6, "deaths": 3, "assists": 9},
+        {"jugador": "Jon", "campeonId": "JIN", "kills": 9, "deaths": 3, "assists": 12},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 11, "deaths": 2, "assists": 11}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P007",
+    "fecha": "2026-10-07",
+    "duracionMin": 32,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "GAR", "kills": 2, "deaths": 5, "assists": 4},
+        {"jugador": "Lucía", "campeonId": "LEE", "kills": 4, "deaths": 6, "assists": 8},
+        {"jugador": "Íñigo", "campeonId": "YAS", "kills": 1, "deaths": 8, "assists": 8},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 2, "deaths": 4, "assists": 5},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 2, "deaths": 5, "assists": 5}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "ORN", "kills": 9, "deaths": 4, "assists": 9},
+        {"jugador": "Unai", "campeonId": "NUN", "kills": 7, "deaths": 4, "assists": 7},
+        {"jugador": "Sofía", "campeonId": "AHR", "kills": 4, "deaths": 3, "assists": 5},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 4, "deaths": 2, "assists": 9},
+        {"jugador": "Ane", "campeonId": "LUL", "kills": 7, "deaths": 3, "assists": 17}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P008",
+    "fecha": "2026-10-08",
+    "duracionMin": 28,
+    "ganador": "azul",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "DAR", "kills": 7, "deaths": 1, "assists": 7},
+        {"jugador": "Lucía", "campeonId": "LEE", "kills": 4, "deaths": 2, "assists": 10},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 8, "deaths": 5, "assists": 14},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 10, "deaths": 1, "assists": 16},
+        {"jugador": "Aitor", "campeonId": "LUX", "kills": 6, "deaths": 1, "assists": 16}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 3, "deaths": 8, "assists": 7},
+        {"jugador": "Unai", "campeonId": "NUN", "kills": 3, "deaths": 8, "assists": 1},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 7, "deaths": 9, "assists": 7},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 6, "deaths": 6, "assists": 4},
+        {"jugador": "Ane", "campeonId": "THR", "kills": 6, "deaths": 4, "assists": 8}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P009",
+    "fecha": "2026-10-09",
+    "duracionMin": 29,
+    "ganador": "azul",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "ORN", "kills": 9, "deaths": 3, "assists": 15},
+        {"jugador": "Lucía", "campeonId": "LEE", "kills": 4, "deaths": 1, "assists": 4},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 9, "deaths": 0, "assists": 15},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": 11, "deaths": 0, "assists": 12},
+        {"jugador": "Aitor", "campeonId": "THR", "kills": 7, "deaths": 0, "assists": 15}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "GAR", "kills": 6, "deaths": 5, "assists": 4},
+        {"jugador": "Unai", "campeonId": "NUN", "kills": 4, "deaths": 8, "assists": 6},
+        {"jugador": "Sofía", "campeonId": "ZED", "kills": 4, "deaths": 7, "assists": 7},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 3, "deaths": 6, "assists": 9},
+        {"jugador": "Ane", "campeonId": "LUX", "kills": 7, "deaths": 9, "assists": 8}
+      ]
+    }
+  },
+  {
+    "servidor": "EUW",
+    "idPartida": "P010",
+    "fecha": "2026-10-10",
+    "duracionMin": 37,
+    "ganador": "rojo",
+    "equipos": {
+      "azul": [
+        {"jugador": "Txema", "campeonId": "ORN", "kills": 1, "deaths": 10, "assists": 4},
+        {"jugador": "Lucía", "campeonId": "NUN", "kills": 0, "deaths": 9, "assists": 1},
+        {"jugador": "Íñigo", "campeonId": "AHR", "kills": 5, "deaths": 5, "assists": 4},
+        {"jugador": "Marta", "campeonId": "JIN", "kills": "7", "deaths": 3, "assists": 4},
+        {"jugador": "Aitor", "campeonId": "LUX", "kills": 7, "deaths": 10, "assists": 9}
+      ],
+      "rojo": [
+        {"jugador": "Nerea", "campeonId": "DAR", "kills": 6, "deaths": 3, "assists": 9},
+        {"jugador": "Unai", "campeonId": "LEE", "kills": 8, "deaths": 4, "assists": 6},
+        {"jugador": "Sofía", "campeonId": "YAS", "kills": 7, "deaths": 3, "assists": 9},
+        {"jugador": "Jon", "campeonId": "KAI", "kills": 12, "deaths": 5, "assists": 12},
+        {"jugador": "Ane", "campeonId": "THR", "kills": 5, "deaths": 4, "assists": 12}
+      ]
+    }
+  }
+]

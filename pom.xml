@@ -16,7 +16,7 @@
     </properties>
 
     <dependencies>
-        <!-- Conector JDBC del servidor (parte principal de la práctica) -->
+        <!-- Conector JDBC del servidor -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
@@ -30,7 +30,7 @@
             <version>3.53.4.0</version>
         </dependency>
 
-        <!-- Reutilizadas de la P1: lectura de las entradas -->
+        <!-- Reutilizadas de la P1 -->
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
@@ -63,7 +63,7 @@
                             <createDependencyReducedPom>false</createDependencyReducedPom>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>es.p2.lol.App</mainClass>
+                                    <mainClass>App</mainClass>
                                 </transformer>
                                 <!-- Une los META-INF/services de las librerías. Sin esto, los drivers
                                      de PostgreSQL y SQLite se pisan y uno deja de registrarse -->

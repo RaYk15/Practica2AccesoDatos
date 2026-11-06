@@ -16,18 +16,4 @@ public record Participante(String jugador, String campeonId, int kills, int deat
     public double kda() {
         return (kills + assists) / (double) Math.max(1, deaths);
     }
-
-    public JSONObject aJson() {
-        return new JSONObject()
-                .put("jugador", jugador)
-                .put("campeonId", campeonId)
-                .put("kills", kills)
-                .put("deaths", deaths)
-                .put("assists", assists);
-    }
-
-    public static Participante desdeJson(JSONObject o) {
-        return new Participante(o.getString("jugador"), o.getString("campeonId"),
-                o.getInt("kills"), o.getInt("deaths"), o.getInt("assists"));
-    }
 }
