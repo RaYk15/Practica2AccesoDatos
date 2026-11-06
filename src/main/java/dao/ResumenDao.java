@@ -12,10 +12,10 @@ import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/** Acceso a la tabla resumen_importacion. */
+/** SQL de la tabla resumen_importacion (un resumen por cada importación de partidas). */
 public class ResumenDao {
 
-    /** Una fila de resumen_importacion. */
+    /** Una fila de la tabla resumen_importacion. */
     public record Resumen(int id, OffsetDateTime momento, int procesadas, int nuevas,
                           int duplicadas, int conflictos, int rechazadas) {
     }
@@ -26,7 +26,10 @@ public class ResumenDao {
         this.conexiones = conexiones;
     }
 
-    /** Usa la conexión de la transacción del lote: no hace commit. */
+    /**
+     * Guarda el resumen usando la conexión de la transacción de la importación.
+     * No hace commit: así el resumen se guarda junto con las partidas o no se guarda.
+     */
     public void insertar(Connection con, Contador c) throws SQLException {
         String sql = "INSERT INTO resumen_importacion (procesadas, nuevas, duplicadas, conflictos, rechazadas) "
                 + "VALUES (?, ?, ?, ?, ?)";
@@ -40,7 +43,7 @@ public class ResumenDao {
         }
     }
 
-    /** Todos los resúmenes, del más antiguo al más reciente. Abre su propia conexión. */
+    /** Todos los resúmenes, del más antiguo al más nuevo. Abre su propia conexión. */
     public List<Resumen> listar() throws ErrorBaseDatos {
         String sql = "SELECT id, momento, procesadas, nuevas, duplicadas, conflictos, rechazadas "
                 + "FROM resumen_importacion ORDER BY id";
@@ -49,6 +52,7 @@ public class ResumenDao {
              ResultSet rs = ps.executeQuery()) {
             List<Resumen> lista = new ArrayList<>();
             while (rs.next()) {
+                // la columna momento es TIMESTAMPTZ, en Java la leo como OffsetDateTime
                 lista.add(new Resumen(rs.getInt("id"), rs.getObject("momento", OffsetDateTime.class),
                         rs.getInt("procesadas"), rs.getInt("nuevas"), rs.getInt("duplicadas"),
                         rs.getInt("conflictos"), rs.getInt("rechazadas")));

@@ -11,18 +11,26 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Lee partidas.json entero de golpe y lo convierte con org.json.
+ * Solo lee: la validación de cada partida la hace ValidadorPartida.
+ */
 public class LectorJson {
-    /** Tamaño máximo admitido */
+
+    /** Como el JSON se carga entero en memoria, pongo un tamaño máximo (5 MB). */
     public static final long TAMANO_MAXIMO = 5L * 1024 * 1024;
 
     /**
-     * Modo estricto: sin él, org.json acepta cosas que no son JSON válido.
+     * Modo estricto: sin esto org.json acepta cosas que no son JSON de verdad,
+     * como comillas simples o una coma al final.
      */
     private static final JSONParserConfiguration ESTRICTO =
             new JSONParserConfiguration().withStrictMode();
 
     /**
-     * @return los elementos del array raíz en orden
+     * Devuelve los elementos del array del archivo, en orden.
+     * Los devuelvo como Object y no como JSONObject para que el validador
+     * pueda rechazar los que no sean objetos.
      */
     public List<Object> leer(Path ruta) throws ErrorLectura {
         if (!Files.isRegularFile(ruta)) {
@@ -36,7 +44,7 @@ public class LectorJson {
                         + " bytes y el máximo es " + TAMANO_MAXIMO);
             }
 
-            // readString abre y cierra el archivo por sí mismo
+            // readString abre el archivo, lo lee entero y lo cierra
             String texto = Files.readString(ruta, StandardCharsets.UTF_8);
             JSONArray array = new JSONArray(texto, ESTRICTO);
 

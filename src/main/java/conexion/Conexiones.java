@@ -7,10 +7,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 /**
- * Abre conexiones con PostgreSQL mediante JDBC.
+ * Abre conexiones con PostgreSQL usando JDBC.
  *
- * Cada operación pide una conexión nueva con abrir() y QUIEN LA PIDE
- * LA CIERRA, con try-with-resources. Así la conexión se libera también si hay un error.
+ * No uso pool de conexiones: cada operación pide una conexión con abrir()
+ * y el que la pide la cierra con try-with-resources. Así se cierra siempre,
+ * aunque salte un error a mitad.
  */
 public final class Conexiones {
 
@@ -20,6 +21,7 @@ public final class Conexiones {
         this.config = config;
     }
 
+    /** Abre una conexión nueva. Quien la llama tiene que cerrarla. */
     public Connection abrir() throws ErrorConexion {
         try {
             return DriverManager.getConnection(config.url(), config.usuario(), config.contrasena());
@@ -28,7 +30,7 @@ public final class Conexiones {
         }
     }
 
-    /** Consulta mínima: abre una conexión, pregunta la versión del servidor y la cierra. */
+    /** Prueba de conexión: abre, pregunta la versión del servidor y cierra. */
     public String comprobar() throws ErrorConexion {
         try (Connection c = abrir();
              Statement st = c.createStatement();
@@ -41,8 +43,9 @@ public final class Conexiones {
     }
 
     /**
-     * Traduce el error de JDBC a un mensaje útil. Se decide por el SQLState
-     * (código estándar del error) y nunca se muestra la contraseña.
+     * Pasa el error de JDBC a un mensaje que se entienda.
+     * Lo decido por el SQLState, que es un código estándar de error de SQL.
+     * La contraseña no aparece nunca en el mensaje.
      */
     private String explicar(SQLException e) {
         String estado = e.getSQLState() == null ? "" : e.getSQLState();
@@ -52,8 +55,8 @@ public final class Conexiones {
             return "La URL de config/bd.properties no es válida (debe empezar por jdbc:postgresql://).";
         }
         return switch (estado) {
-            case "28P01", "28000" -> "Usuario o contraseña incorrectos para el usuario «" + config.usuario()
-                    + "». Revisa config/bd.properties y el .env de Docker.";
+            case "28P01", "28000" -> "Usuario o contraseña incorrectos para el usuario '" + config.usuario()
+                    + "'. Revisa config/bd.properties y el .env de Docker.";
             case "3D000" -> "La base de datos de la URL no existe en el servidor (" + servidor() + ").";
             case "08001", "08004", "08006" -> "No se puede conectar con el servidor " + servidor()
                     + ". ¿Está arrancado el contenedor? (docker compose up -d)";
@@ -61,7 +64,7 @@ public final class Conexiones {
         };
     }
 
-    /** "localhost:5433" a partir de la URL, para los mensajes de error. */
+    /** Saca "localhost:5433" de la URL, para ponerlo en los mensajes de error. */
     private String servidor() {
         String url = config.url();
         int inicio = url.indexOf("//");

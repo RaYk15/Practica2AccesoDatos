@@ -3,8 +3,9 @@ package conexion;
 import java.sql.SQLException;
 
 /**
- * Error al trabajar con la base de datos, con un mensaje pensado para el usuario.
- * Traduce los SQLState de las restricciones del esquema a explicaciones del dominio.
+ * Error al trabajar con la base de datos, con un mensaje que se pueda enseñar al usuario.
+ * Traduce los errores de las restricciones del esquema (UNIQUE, FOREIGN KEY, CHECK...)
+ * a una explicación normal.
  */
 public class ErrorBaseDatos extends Exception {
 
@@ -19,13 +20,14 @@ public class ErrorBaseDatos extends Exception {
     }
 
     /**
-     * @param que lo que se intentaba guardar o borrar, por ejemplo "el campeón AHR"
+     * Crea el error a partir de la SQLException mirando su SQLState.
+     * @param que lo que se intentaba hacer, por ejemplo "el campeón AHR"
      */
     public static ErrorBaseDatos desde(SQLException e, String que) {
         String estado = e.getSQLState() == null ? "" : e.getSQLState();
         String mensaje = switch (estado) {
             case "23505" -> "Ya existe " + que + " (clave repetida, la base lo rechaza).";
-            // 23503: clave foránea; 23001: la misma, cuando es ON DELETE RESTRICT
+            // 23503 es clave foránea; 23001 es lo mismo cuando la clave foránea es ON DELETE RESTRICT
             case "23503", "23001" -> "No se puede guardar o borrar " + que
                     + ": rompería una referencia entre tablas (clave foránea).";
             case "23514" -> "La base rechaza " + que + ": incumple una restricción CHECK del esquema.";

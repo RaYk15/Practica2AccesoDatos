@@ -9,15 +9,15 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Comando "campeon" de la consola:
+ * Comando "campeon". Recibe lo que viene después de la palabra campeon:
  *   campeon ver <id>
  *   campeon listar [rol|todos] [nombre|dificultad|id]
  *   campeon crear <id> <nombre> <rol> <region> <dificultad>
  *   campeon modificar <id> <nombre> <rol> <region> <dificultad>
  *   campeon borrar <id>
  *   campeon renombrar <id> <nombre>             llama al procedimiento almacenado
- *   campeon renombrar-revertir <id> <nombre>    lo llama dentro de una transacción y hace rollback
- * Los textos con espacios o apóstrofo van entre comillas dobles: "Kai'Sa".
+ *   campeon renombrar-revertir <id> <nombre>    lo mismo pero dentro de una transacción con rollback
+ * Desde la terminal, los textos con espacios o apóstrofo van entre comillas dobles: "Kai'Sa".
  */
 public class ComandosCampeon {
 
@@ -27,7 +27,7 @@ public class ComandosCampeon {
         this.dao = dao;
     }
 
-    /** @return código de salida: 0 si va bien */
+    /** Devuelve 0 si todo va bien y 1 si hay algún error. */
     public int ejecutar(List<String> args) {
         String accion = args.isEmpty() ? "" : args.get(0);
         try {
@@ -62,6 +62,7 @@ public class ComandosCampeon {
     }
 
     private void listar(List<String> args) throws ErrorBaseDatos {
+        // si no ponen rol o ponen "todos", no filtro; si no ponen orden, ordeno por nombre
         String rol = args.size() >= 2 && !args.get(1).equalsIgnoreCase("todos") ? args.get(1) : null;
         CampeonDao.Orden orden = args.size() == 3 ? CampeonDao.Orden.desde(args.get(2)) : CampeonDao.Orden.NOMBRE;
         List<Campeon> lista = dao.listar(rol, orden);
@@ -97,6 +98,7 @@ public class ComandosCampeon {
 
     private void renombrar(String id, String nombre) throws ErrorBaseDatos {
         dao.renombrar(id, nombre);
+        // vuelvo a leerlo de la base para ver que de verdad ha cambiado
         System.out.println("Procedimiento ejecutado y confirmado. Lectura nueva: "
                 + dao.buscarPorClave(id).map(ComandosCampeon::formato).orElse("(no encontrado)"));
     }
@@ -105,24 +107,25 @@ public class ComandosCampeon {
         String antes = dao.buscarPorClave(id).map(Campeon::nombre).orElse("(no existe)");
         String dentro = dao.renombrarYRevertir(id, nombre);
         String despues = dao.buscarPorClave(id).map(Campeon::nombre).orElse("(no existe)");
-        System.out.println("  Antes:                                «" + antes + "»");
-        System.out.println("  Dentro de la transacción (sin commit): «" + dentro + "»");
-        System.out.println("  Tras el rollback (conexión nueva):     «" + despues + "»");
+        System.out.println("  Antes:                                 \"" + antes + "\"");
+        System.out.println("  Dentro de la transacción (sin commit): \"" + dentro + "\"");
+        System.out.println("  Después del rollback (lectura nueva):  \"" + despues + "\"");
     }
 
-    /** crear/modificar <id> <nombre> <rol> <region> <dificultad> */
+    /** Monta el Campeon con los argumentos: <id> <nombre> <rol> <region> <dificultad> */
     private Campeon leer(List<String> args) {
         int dificultad;
         try {
             dificultad = Integer.parseInt(args.get(5).strip());
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("la dificultad «" + args.get(5) + "» no es un número entero");
+            throw new IllegalArgumentException("la dificultad '" + args.get(5) + "' no es un número entero");
         }
         return new Campeon(args.get(1), args.get(2), args.get(3), args.get(4), dificultad);
     }
 
+    /** Ejemplo: AHR | Ahri | mid | Jonia | dificultad 2 */
     private static String formato(Campeon c) {
-        return c.id() + " · " + c.nombre() + " · " + c.rol() + " · " + c.region() + " · dificultad " + c.dificultad();
+        return c.id() + " | " + c.nombre() + " | " + c.rol() + " | " + c.region() + " | dificultad " + c.dificultad();
     }
 
     private int ayuda() {

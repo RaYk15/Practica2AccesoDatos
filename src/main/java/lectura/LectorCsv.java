@@ -15,17 +15,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Lee campeones.csv línea a línea con Commons CSV (lectura secuencial).
+ * Solo lee el texto: no convierte ni valida nada, eso lo hace ValidadorCampeon.
+ */
 public class LectorCsv {
+
+    /** La cabecera tiene que ser exactamente esta. */
     public static final List<String> CABECERA =
             List.of("idCampeon", "nombre", "rol", "region", "dificultad");
 
     /**
-     * Formato CSV estándar.
+     * Formato CSV normal: separado por comas y con comillas dobles.
+     * Así "Vacío, Runaterra" entre comillas cuenta como un solo campo.
      */
     private static final CSVFormat FORMATO = CSVFormat.DEFAULT.builder()
-            .setHeader()                // la primera fila es la cabecera...
-            .setSkipHeaderRecord(true)  // ...y no se devuelve como un registro de datos
-            .setIgnoreEmptyLines(true)  // las líneas vacías se saltan, no terminan la lectura
+            .setHeader()                // la primera fila es la cabecera
+            .setSkipHeaderRecord(true)  // y no la devuelvo como si fuera un dato
+            .setIgnoreEmptyLines(true)  // las líneas vacías se saltan
             .get();
 
     public List<FilaCsv> leer(Path ruta) throws ErrorLectura {
@@ -35,7 +42,7 @@ public class LectorCsv {
 
         List<FilaCsv> filas = new ArrayList<>();
 
-        // try-with-resources pal parser y el lector
+        // try-with-resources: el lector y el parser se cierran solos aunque haya un error
         try (Reader lector = Files.newBufferedReader(ruta, StandardCharsets.UTF_8);
              CSVParser parser = FORMATO.parse(lector)) {
 
@@ -48,7 +55,7 @@ public class LectorCsv {
             }
 
         } catch (IOException | UncheckedIOException e) {
-            // tira error de lectura si da algún fallo
+            // el archivo no se puede leer: comillas sin cerrar, codificación mala, etc.
             throw new ErrorLectura("No se puede interpretar " + ruta + ": " + e.getMessage(), e);
         }
 
@@ -63,10 +70,11 @@ public class LectorCsv {
         }
     }
 
-    /** Pasa el registro a un mapa columna -> texto */
+    /** Pasa la fila a un mapa columna -> texto, en el orden de la cabecera. */
     private Map<String, String> aMapa(CSVRecord registro) {
         Map<String, String> valores = new LinkedHashMap<>();
         for (String columna : CABECERA) {
+            // si a la fila le falta esa columna, guardo null
             valores.put(columna, registro.isSet(columna) ? registro.get(columna) : null);
         }
         return valores;

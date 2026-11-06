@@ -16,19 +16,21 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Acceso a la tabla campeon. Es la única clase que contiene SQL de campeones.
+ * Todo el SQL de la tabla campeon está aquí (DAO = Data Access Object).
+ * El resto del programa trabaja con objetos Campeon y no sabe nada de SQL.
  *
- * - Los VALORES siempre van como parámetros (?) de un PreparedStatement:
- *   "Kai'Sa" se guarda como dato y nunca puede romper la sentencia.
- * - Cada método abre su conexión y la cierra al terminar (try-with-resources),
+ * - Los valores van siempre con ? en un PreparedStatement. Así "Kai'Sa" se guarda
+ *   como un dato normal y nadie puede meter SQL por un campo de texto.
+ * - Cada método abre su conexión y la cierra al acabar con try-with-resources,
  *   también si hay un error.
  */
 public class CampeonDao {
 
     /**
-     * Órdenes permitidos para el listado. El usuario elige una opción y se traduce a
-     * columnas fijas escritas aquí: un nombre de columna NO puede ir como parámetro (?).
-     * El último criterio es siempre la clave, para que el orden sea estable.
+     * Los órdenes que se pueden elegir al listar.
+     * Un nombre de columna NO se puede pasar con ?, solo los valores. Por eso el usuario
+     * elige una opción y yo la traduzco a un ORDER BY escrito aquí a mano.
+     * Al final siempre ordeno por id para que el orden sea siempre el mismo.
      */
     public enum Orden {
         NOMBRE("nombre, id_campeon"),
@@ -41,14 +43,14 @@ public class CampeonDao {
             this.sql = sql;
         }
 
-        /** "nombre" -> NOMBRE. Cualquier otra cosa se rechaza. */
+        /** Pasa el texto a la opción ("nombre" -> NOMBRE). Si no es ninguna, lanza error. */
         public static Orden desde(String texto) {
             for (Orden o : values()) {
                 if (o.name().equalsIgnoreCase(texto)) {
                     return o;
                 }
             }
-            throw new IllegalArgumentException("Orden «" + texto + "» no válido: usa nombre, dificultad o id");
+            throw new IllegalArgumentException("Orden '" + texto + "' no válido: usa nombre, dificultad o id");
         }
     }
 
@@ -63,7 +65,7 @@ public class CampeonDao {
 
     // ---------- Crear ----------
 
-    /** Valida y guarda un campeón nuevo. Devuelve el campeón normalizado que se ha guardado. */
+    /** Valida el campeón y lo guarda. Devuelve el campeón tal cual se ha guardado. */
     public Campeon crear(Campeon nuevo) throws Rechazo, ErrorBaseDatos {
         Campeon c = validador.validar(nuevo);
         String sql = "INSERT INTO campeon (" + COLUMNAS + ") VALUES (?, ?, ?, ?, ?)";
@@ -83,7 +85,7 @@ public class CampeonDao {
 
     // ---------- Buscar por clave ----------
 
-    /** Sin resultados devuelve Optional.empty(): no es un error. */
+    /** Si no lo encuentra devuelve Optional vacío, no es un error. */
     public Optional<Campeon> buscarPorClave(String id) throws ErrorBaseDatos {
         String sql = "SELECT " + COLUMNAS + " FROM campeon WHERE id_campeon = ?";
         try (Connection con = conexiones.abrir();
@@ -100,9 +102,9 @@ public class CampeonDao {
     // ---------- Listar con filtro y orden ----------
 
     /**
-     * @param rol   filtro por rol, o null para todos
-     * @param orden criterio de orden (lista cerrada)
-     * @return lista vacía si no hay coincidencias
+     * @param rol   rol por el que filtrar, o null para sacarlos todos
+     * @param orden cómo ordenar
+     * @return la lista, vacía si no hay ninguno
      */
     public List<Campeon> listar(String rol, Orden orden) throws ErrorBaseDatos {
         String sql = "SELECT " + COLUMNAS + " FROM campeon"
@@ -128,8 +130,8 @@ public class CampeonDao {
     // ---------- Modificar ----------
 
     /**
-     * Valida el nuevo contenido y lo guarda. La identidad (id_campeon) no cambia nunca.
-     * @return filas afectadas: 1 si se ha modificado, 0 si no existe ese campeón
+     * Valida los datos nuevos y los guarda. El id no se cambia nunca.
+     * @return filas cambiadas: 1 si se ha modificado, 0 si no existe ese campeón
      */
     public int modificar(Campeon cambios) throws Rechazo, ErrorBaseDatos {
         Campeon c = validador.validar(cambios);
@@ -150,9 +152,9 @@ public class CampeonDao {
     // ---------- Borrar ----------
 
     /**
-     * Un campeón que aparece en partidas NO se puede borrar (la clave foránea lo impide):
-     * así no se pierde el historial. Para la prueba de borrado se usa un campeón sin partidas.
-     * @return filas afectadas: 1 si se ha borrado, 0 si no existía
+     * Un campeón que sale en alguna partida no se puede borrar, la clave foránea no deja.
+     * Así no se pierde el historial. Para probar el borrado uso un campeón sin partidas.
+     * @return filas borradas: 1 si se ha borrado, 0 si no existía
      */
     public int borrar(String id) throws ErrorBaseDatos {
         try (Connection con = conexiones.abrir();
@@ -167,9 +169,9 @@ public class CampeonDao {
     // ---------- Procedimiento almacenado ----------
 
     /**
-     * Llama al procedimiento renombrar_campeon de la base (sql/procedimiento.sql).
-     * La lógica (nombre no vacío, campeón existente) está DENTRO de la base, no aquí.
-     * Con autocommit activado, el cambio queda confirmado al terminar la llamada.
+     * Llama al procedimiento renombrar_campeon (está en sql/procedimiento.sql).
+     * Lo que comprueba (nombre no vacío y que el campeón exista) lo hace la base de datos,
+     * no Java. Como la conexión está en autocommit, el cambio se guarda al acabar.
      */
     public void renombrar(String id, String nombreNuevo) throws ErrorBaseDatos {
         try (Connection con = conexiones.abrir();
@@ -183,9 +185,9 @@ public class CampeonDao {
     }
 
     /**
-     * Prueba de reversión: llama al procedimiento DENTRO de una transacción, lee el nombre
-     * en esa misma transacción (ya cambiado) y hace rollback. El procedimiento no confirma
-     * por su cuenta, así que el cambio desaparece.
+     * Prueba de que el procedimiento se puede deshacer: lo llamo dentro de una transacción,
+     * leo el nombre en esa misma transacción (ya sale cambiado) y hago rollback.
+     * Como el procedimiento no hace commit por su cuenta, el cambio desaparece.
      * @return el nombre que se veía dentro de la transacción, antes del rollback
      */
     public String renombrarYRevertir(String id, String nombreNuevo) throws ErrorBaseDatos {
@@ -207,14 +209,14 @@ public class CampeonDao {
                 }
                 return dentro;
             } finally {
-                con.rollback();   // siempre: es una prueba de reversión
+                con.rollback();   // siempre, porque es una prueba
             }
         } catch (SQLException e) {
             throw errorProcedimiento(e, id);
         }
     }
 
-    /** Los RAISE EXCEPTION del procedimiento llegan como SQLState propios. */
+    /** Los errores que lanza el procedimiento (RAISE EXCEPTION) llegan con su propio SQLState. */
     private static ErrorBaseDatos errorProcedimiento(SQLException e, String id) {
         return switch (e.getSQLState() == null ? "" : e.getSQLState()) {
             case "P0002" -> new ErrorBaseDatos("No existe el campeón " + id + ": el procedimiento no ha cambiado nada.", e);
@@ -225,13 +227,13 @@ public class CampeonDao {
         };
     }
 
-    // ---------- Conversión fila -> modelo ----------
+    // ---------- Pasar una fila a objeto ----------
 
     /**
      * Convierte la fila actual del ResultSet en un Campeon.
      * Todas las columnas son NOT NULL en el esquema, así que nunca llega un null.
-     * Ojo: si una columna numérica admitiera NULL, getInt() devolvería 0 sin avisar;
-     * habría que usar rs.getObject("columna", Integer.class), que sí devuelve null.
+     * Ojo: si una columna de número pudiera ser NULL, getInt() devolvería 0 sin avisar,
+     * y habría que usar rs.getObject("columna", Integer.class), que sí devuelve null.
      */
     static Campeon desdeFila(ResultSet rs) throws SQLException {
         return new Campeon(

@@ -1,8 +1,9 @@
 package conexion;
 
 /**
- * No se ha podido conectar con la base de datos (o falta la configuración).
- * El mensaje está pensado para mostrarse al usuario: nunca incluye la contraseña.
+ * No se ha podido conectar con la base de datos, o falta la configuración.
+ * Hereda de ErrorBaseDatos, así que con un solo catch (ErrorBaseDatos e) se cogen los dos.
+ * El mensaje nunca lleva la contraseña.
  */
 public class ErrorConexion extends ErrorBaseDatos {
 

@@ -12,10 +12,10 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 /**
- * Comandos:
+ * Comandos de importación:
  *   importar [--entrada=CARPETA] [--fallo]   importa campeones.csv y partidas.json
- *   resumenes                                 lista los resúmenes guardados (lectura nueva)
- * --fallo es la prueba de rollback: provoca un error antes del commit.
+ *   resumenes                                 enseña los resúmenes guardados en la base
+ * --fallo sirve para probar el rollback: provoca un error antes del commit.
  */
 public class ComandosImportacion {
 
@@ -27,7 +27,7 @@ public class ComandosImportacion {
         this.conexiones = conexiones;
     }
 
-    /** @param args el comando completo, empezando por "importar" o "resumenes" */
+    /** Recibe el comando entero, empezando por "importar" o "resumenes". */
     public int ejecutar(List<String> args) {
         try {
             return switch (args.get(0)) {
@@ -79,10 +79,10 @@ public class ComandosImportacion {
             System.out.println("No hay resúmenes de importación");
             return 0;
         }
-        System.out.println("Resúmenes de importación de partidas (procesadas: nuevas/duplicadas/conflictos/rechazadas):");
+        System.out.println("Resúmenes de importación de partidas (nuevas/duplicadas/conflictos/rechazadas):");
         for (ResumenDao.Resumen r : lista) {
-            System.out.println("  R" + r.id() + " · " + r.momento().format(HORA) + " · " + r.procesadas() + ": "
-                    + r.nuevas() + "/" + r.duplicadas() + "/" + r.conflictos() + "/" + r.rechazadas());
+            System.out.println("  R" + r.id() + " | " + r.momento().format(HORA) + " | " + r.procesadas()
+                    + " procesadas | " + r.nuevas() + "/" + r.duplicadas() + "/" + r.conflictos() + "/" + r.rechazadas());
         }
         return 0;
     }

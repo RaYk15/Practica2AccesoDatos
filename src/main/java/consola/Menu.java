@@ -4,28 +4,32 @@ import conexion.Conexiones;
 import conexion.ErrorBaseDatos;
 import dao.CampeonDao;
 import dao.PartidaDao;
+import embebido.LaboratorioSqlite;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 /**
- * Menú interactivo. No contiene lógica propia: pide los datos por teclado
- * y llama a las mismas clases de consola que los comandos.
- * Cada dato se lee en su propia línea, así que no hacen falta comillas.
+ * Menú por consola con números (1-9 para elegir, 0 para volver o salir).
+ * No hace nada por su cuenta: pide los datos por teclado y llama a las mismas
+ * clases que los comandos (ComandosCampeon, ComandosPartida, ComandosImportacion).
+ * Cada dato se pide en su propia línea, así que no hacen falta comillas para "Kai'Sa".
  */
 public class Menu {
 
-    /** Se lanza si se cierra la entrada estándar (Ctrl+Z / Ctrl+D): termina el programa. */
+    /** La lanzo si se cierra la entrada (Ctrl+Z en Windows) para salir sin que pete. */
     private static class FinDeEntrada extends RuntimeException {
         private static final long serialVersionUID = 1L;
     }
 
+    // Un solo Scanner para todo el programa (crear varios sobre System.in da problemas)
     private final Scanner teclado = new Scanner(System.in);
     private final Conexiones conexiones;
     private final ComandosCampeon campeones;
     private final ComandosPartida partidas;
     private final ComandosImportacion importacion;
+    private final LaboratorioSqlite laboratorio = new LaboratorioSqlite();
 
     public Menu(Conexiones conexiones) {
         this.conexiones = conexiones;
@@ -42,7 +46,8 @@ public class Menu {
                         "Campeones",
                         "Partidas",
                         "Importación",
-                        "Procedimiento almacenado");
+                        "Procedimiento almacenado",
+                        "Laboratorio SQLite (embebido)");
                 switch (opcion) {
                     case 0 -> {
                         System.out.println("¡Hasta luego!");
@@ -53,6 +58,7 @@ public class Menu {
                     case 3 -> menuPartidas();
                     case 4 -> menuImportacion();
                     case 5 -> menuProcedimiento();
+                    case 6 -> menuLaboratorio();
                     default -> opcionNoValida();
                 }
             }
@@ -61,7 +67,7 @@ public class Menu {
         }
     }
 
-    // submenús
+    // submenús: todos igual, un bucle hasta que se elige 0
 
     private void menuCampeones() {
         while (true) {
@@ -148,7 +154,28 @@ public class Menu {
         }
     }
 
-    // acciones sueltas
+    private void menuLaboratorio() {
+        while (true) {
+            int opcion = elegir("LABORATORIO SQLITE (lab/lol.db)", "Volver",
+                    "Crear archivo y tabla",
+                    "Insertar campeón",
+                    "Listar campeones",
+                    "Modificar campeón",
+                    "Borrar campeón");
+            switch (opcion) {
+                case 0 -> { return; }
+                case 1 -> laboratorio.ejecutar(List.of("crear"));
+                case 2 -> laboratorio.ejecutar(datosCampeon("insertar"));
+                case 3 -> laboratorio.ejecutar(List.of("listar"));
+                case 4 -> laboratorio.ejecutar(datosCampeon("modificar"));
+                case 5 -> laboratorio.ejecutar(List.of("borrar", pedir("Id del campeón a borrar")));
+                default -> { opcionNoValida(); continue; }
+            }
+            pausa();
+        }
+    }
+
+    // otras acciones
 
     private void comprobarConexion() {
         try {
@@ -168,9 +195,12 @@ public class Menu {
                 pedir("Dificultad (1-3)"));
     }
 
-    // entrada por teclado
+    // leer del teclado
 
-    /** Muestra un menú numerado (0 = salir/volver) y devuelve la opción, o -1 si no es un número. */
+    /**
+     * Enseña un menú con las opciones numeradas desde 1 y la opción 0 al final.
+     * Devuelve el número elegido, o -1 si lo escrito no es una opción válida.
+     */
     private int elegir(String titulo, String opcionCero, String... opciones) {
         System.out.println();
         System.out.println("=== " + titulo + " ===");
@@ -187,6 +217,7 @@ public class Menu {
         }
     }
 
+    /** Escribe la etiqueta y devuelve lo que escriba el usuario. */
     private String pedir(String etiqueta) {
         System.out.print(etiqueta + ": ");
         if (!teclado.hasNextLine()) {
@@ -195,6 +226,7 @@ public class Menu {
         return teclado.nextLine();
     }
 
+    /** Espera a que se pulse Intro, para que dé tiempo a leer el resultado. */
     private void pausa() {
         System.out.print("(Intro para continuar)");
         if (!teclado.hasNextLine()) {

@@ -1,13 +1,16 @@
 package importacion;
 
-import org.json.JSONObject;
-
 /**
- * Contadores de un conjunto (campeones o partidas) en una importación.
- * Cada registro procesado suma en exactamente una caja, así que siempre
+ * Cuenta cómo acaba cada registro en una importación (uno para campeones y otro para partidas).
+ * Cada registro suma en una sola caja, así que siempre se cumple:
  * procesados = nuevos + duplicados + conflictos + rechazados.
  */
 public class Contador {
+
+    /** Las cuatro cajas en las que puede acabar un registro. */
+    public enum Clasificacion {
+        NUEVO, DUPLICADO, CONFLICTO, RECHAZADO
+    }
 
     private int procesados;
     private int nuevos;
@@ -15,10 +18,7 @@ public class Contador {
     private int conflictos;
     private int rechazados;
 
-    public enum Clasificacion {
-        NUEVO, DUPLICADO, CONFLICTO, RECHAZADO
-    }
-
+    /** Suma uno a procesados y uno a la caja que toque. */
     public void contar(Clasificacion clasificacion) {
         procesados++;
         switch (clasificacion) {
@@ -29,13 +29,8 @@ public class Contador {
         }
     }
 
-    @Override
-    public String toString() {
-        return procesados + " procesados -> " + nuevos + " nuevos, " + duplicados + " duplicados, "
-                + conflictos + " conflictos, " + rechazados + " rechazados";
-    }
+    // Solo getters: los números solo cambian con contar(), así siempre cuadran
 
-    // Getters y setters
     public int getProcesados() {
         return procesados;
     }
@@ -56,23 +51,9 @@ public class Contador {
         return rechazados;
     }
 
-    public void setProcesados(int procesados) {
-        this.procesados = procesados;
-    }
-
-    public void setNuevos(int nuevos) {
-        this.nuevos = nuevos;
-    }
-
-    public void setDuplicados(int duplicados) {
-        this.duplicados = duplicados;
-    }
-
-    public void setConflictos(int conflictos) {
-        this.conflictos = conflictos;
-    }
-
-    public void setRechazados(int rechazados) {
-        this.rechazados = rechazados;
+    @Override
+    public String toString() {
+        return procesados + " procesados -> " + nuevos + " nuevos, " + duplicados + " duplicados, "
+                + conflictos + " conflictos, " + rechazados + " rechazados";
     }
 }

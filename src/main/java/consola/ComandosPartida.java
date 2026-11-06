@@ -10,10 +10,10 @@ import java.util.Locale;
 import java.util.Optional;
 
 /**
- * Comando "partida" de la consola:
- *   partida ver <servidor> <idPartida>     búsqueda por identidad
- *   partida con-campeon <idCampeon>        partidas en las que se jugó un campeón (JOIN)
- *   partida recuento                       nº de partidas de cada campeón
+ * Comando "partida":
+ *   partida ver <servidor> <idPartida>     buscar una partida
+ *   partida con-campeon <idCampeon>        partidas en las que ha salido un campeón (JOIN)
+ *   partida recuento                       cuántas partidas tiene cada campeón
  */
 public class ComandosPartida {
 
@@ -23,6 +23,7 @@ public class ComandosPartida {
         this.dao = dao;
     }
 
+    /** Devuelve 0 si todo va bien y 1 si hay algún error. */
     public int ejecutar(List<String> args) {
         String accion = args.isEmpty() ? "" : args.get(0);
         try {
@@ -46,10 +47,11 @@ public class ComandosPartida {
             return;
         }
         Partida p = encontrada.get();
-        System.out.println(p.clave() + " · " + p.fecha() + " · " + p.duracionMin() + " min · gana " + p.ganador());
+        System.out.println(p.clave() + " | " + p.fecha() + " | " + p.duracionMin() + " min | gana " + p.ganador());
         for (String color : List.of("azul", "rojo")) {
             System.out.println("  Equipo " + color + (p.ganador().equals(color) ? " (ganador)" : ""));
             for (Participante j : p.equipo(color)) {
+                // Locale.ROOT para que el KDA salga con punto decimal y no con coma
                 System.out.printf(Locale.ROOT, "    %-10s %-4s %2d/%2d/%2d   KDA %.2f%n", j.jugador(), j.campeonId(),
                         j.kills(), j.deaths(), j.assists(), j.kda());
             }
@@ -64,8 +66,8 @@ public class ComandosPartida {
         }
         System.out.println(lista.size() + " partidas con " + idCampeon + ":");
         for (PartidaDao.PartidaDeCampeon f : lista) {
-            System.out.println("  " + f.clave() + " · " + f.fecha() + " · " + f.jugador() + " (" + f.equipo() + ") · "
-                    + f.kills() + "/" + f.deaths() + "/" + f.assists() + " · " + (f.victoria() ? "victoria" : "derrota"));
+            System.out.println("  " + f.clave() + " | " + f.fecha() + " | " + f.jugador() + " (" + f.equipo() + ") | "
+                    + f.kills() + "/" + f.deaths() + "/" + f.assists() + " | " + (f.victoria() ? "victoria" : "derrota"));
         }
     }
 
@@ -82,8 +84,8 @@ public class ComandosPartida {
     private int ayuda() {
         System.out.println("""
                 Uso:
-                  partida ver <servidor> <idPartida>   p. ej. partida ver EUW P001
-                  partida con-campeon <idCampeon>      p. ej. partida con-campeon LUL
+                  partida ver <servidor> <idPartida>   por ejemplo: partida ver EUW P001
+                  partida con-campeon <idCampeon>      por ejemplo: partida con-campeon LUL
                   partida recuento""");
         return 1;
     }

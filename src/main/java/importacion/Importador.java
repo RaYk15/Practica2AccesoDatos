@@ -29,28 +29,31 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Importa campeones.csv y partidas.json en la base de datos sin duplicar.
+ * Importa campeones.csv y partidas.json a la base de datos sin duplicar nada.
  *
- *   1. Leer las dos entradas. Si una falla, se termina SIN tocar la base.
- *   2. Campeones (A): se preparan antes, fuera de la transacción del lote.
- *   3. Partidas (B): se validan y se clasifican, todavía sin escribir nada.
- *   4. Transacción: partidas nuevas + resumen, en UNA conexión. Commit o rollback.
+ * Pasos:
+ *   1. Leo los dos archivos. Si alguno falla, paro sin tocar la base.
+ *   2. Guardo los campeones (se preparan antes, fuera de la transacción).
+ *   3. Valido y clasifico las partidas, todavía sin guardar nada.
+ *   4. Guardo las partidas nuevas y el resumen en UNA transacción: o todo o nada.
  *
- * Clasificación (igual que en la P1, pero comparando con lo que hay en la base):
- *   clave desconocida -> NUEVO · mismo contenido -> DUPLICADO · otro contenido -> CONFLICTO
- *   (se conserva el anterior) · inválido -> RECHAZADO (no reserva su clave).
- * No se usa un "upsert": nunca se sobrescribe un registro existente.
+ * Cómo clasifico cada registro (igual que en la P1, pero mirando en la base):
+ *   - no existe esa clave              -> NUEVO, se guarda
+ *   - existe y es igual                -> DUPLICADO, no se hace nada
+ *   - existe pero con otros datos      -> CONFLICTO, me quedo con el que ya estaba
+ *   - no cumple las reglas             -> RECHAZADO, no se guarda
+ * Nunca sobrescribo un registro que ya existe.
  */
 public class Importador {
 
     public static final String ARCHIVO_CAMPEONES = "campeones.csv";
     public static final String ARCHIVO_PARTIDAS = "partidas.json";
 
-    /** Lo que se muestra al terminar. */
+    /** Lo que se enseña al terminar: los dos contadores y la lista de incidencias. */
     public record Resultado(Contador campeones, Contador partidas, List<Incidencia> incidencias) {
     }
 
-    /** Excepción de la prueba de rollback: simula un fallo antes del commit. */
+    /** Error falso que lanzo a propósito para probar el rollback. */
     public static class FalloDePrueba extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
@@ -74,11 +77,12 @@ public class Importador {
     }
 
     /**
-     * @param fallarAntesDelCommit prueba de rollback: lanza un error después de insertar
-     *                             la segunda partida nueva y antes del commit
+     * @param carpeta              carpeta donde están campeones.csv y partidas.json
+     * @param fallarAntesDelCommit si es true, lanzo un error después de guardar la segunda
+     *                             partida nueva y antes del commit (prueba de rollback)
      */
     public Resultado importar(Path carpeta, boolean fallarAntesDelCommit) throws ErrorLectura, ErrorBaseDatos {
-        // 1. Interpretar las entradas antes de tocar la base
+        // 1. Leer los archivos antes de tocar la base
         List<FilaCsv> filas = new LectorCsv().leer(carpeta.resolve(ARCHIVO_CAMPEONES));
         List<Object> registros = new LectorJson().leer(carpeta.resolve(ARCHIVO_PARTIDAS));
 
@@ -86,13 +90,13 @@ public class Importador {
         Contador contPartidas = new Contador();
         List<Incidencia> incidencias = new ArrayList<>();
 
-        // 2. Campeones (A)
+        // 2. Campeones
         importarCampeones(filas, contCampeones, incidencias);
 
-        // 3. Partidas (B): validar y clasificar sin escribir
+        // 3. Partidas: validar y clasificar (sin guardar)
         List<Partida> nuevas = clasificarPartidas(registros, contPartidas, incidencias);
 
-        // 4. Transacción del lote
+        // 4. Transacción: partidas nuevas + resumen
         guardarLote(nuevas, contPartidas, fallarAntesDelCommit);
 
         return new Resultado(contCampeones, contPartidas, incidencias);
@@ -111,11 +115,12 @@ public class Importador {
                 incidencias.add(new Incidencia(ARCHIVO_CAMPEONES, fila.numero(), claveCampeon(fila), r.motivo(), r.getMessage()));
                 continue;
             }
+            // miro si ya existe en la base y lo comparo
             Optional<Campeon> existente = campeonDao.buscarPorClave(c.id());
             if (existente.isEmpty()) {
                 try {
                     campeonDao.crear(c);
-                } catch (Rechazo r) {   // no ocurre: ya está validado
+                } catch (Rechazo r) {   // no puede pasar, ya está validado
                     throw new IllegalStateException(r);
                 }
                 cont.contar(Contador.Clasificacion.NUEVO);
@@ -130,15 +135,19 @@ public class Importador {
 
     // ---------- Paso 3: partidas ----------
 
+    /** Devuelve solo las partidas nuevas, que son las que hay que guardar. */
     private List<Partida> clasificarPartidas(List<Object> registros, Contador cont, List<Incidencia> incidencias)
             throws ErrorBaseDatos {
-        // Referencias válidas: los campeones que hay en la base (incluidos los recién importados)
+        // Los campeones que hay en la base (ya con los que acabo de importar),
+        // para comprobar que cada partida usa campeones que existen
         Set<String> campeones = new HashSet<>();
         for (Campeon c : campeonDao.listar(null, CampeonDao.Orden.ID)) {
             campeones.add(c.id());
         }
 
-        Map<String, Partida> delLote = new LinkedHashMap<>();   // nuevas aceptadas en ESTE lote
+        // Partidas nuevas de este mismo archivo, por si una se repite dentro del lote
+        Map<String, Partida> delLote = new LinkedHashMap<>();
+
         try (Connection lectura = conexiones.abrir()) {
             for (int i = 0; i < registros.size(); i++) {
                 int numero = i + 1;
@@ -151,7 +160,7 @@ public class Importador {
                             r.motivo(), r.getMessage()));
                     continue;
                 }
-                // Se compara con lo aceptado en el lote y con lo guardado en la base
+                // primero miro en las de este lote y luego en la base
                 Partida anterior = delLote.get(p.clave());
                 if (anterior == null) {
                     anterior = partidaDao.buscarPorClave(lectura, p.servidor(), p.idPartida()).orElse(null);
@@ -175,14 +184,14 @@ public class Importador {
     // ---------- Paso 4: la transacción ----------
 
     /**
-     * Partidas nuevas + resumen en una sola transacción y una sola conexión.
-     * Si algo falla antes del commit, rollback: no queda ninguna partida del lote ni su resumen.
-     * Lo confirmado en importaciones anteriores no se toca.
+     * Guarda las partidas nuevas y el resumen en una sola transacción, con una sola conexión.
+     * Si algo falla antes del commit hago rollback: no se queda ninguna partida del lote
+     * ni el resumen. Lo que ya estaba guardado de antes no se toca.
      */
     private void guardarLote(List<Partida> nuevas, Contador cont, boolean fallarAntesDelCommit)
             throws ErrorBaseDatos {
-        try (Connection con = conexiones.abrir()) {          // se cierra SIEMPRE al salir
-            con.setAutoCommit(false);                        // INICIAR transacción
+        try (Connection con = conexiones.abrir()) {          // se cierra siempre al salir
+            con.setAutoCommit(false);                        // empieza la transacción
             try {
                 for (int i = 0; i < nuevas.size(); i++) {
                     partidaDao.insertar(con, nuevas.get(i));
@@ -190,37 +199,39 @@ public class Importador {
                         throw new FalloDePrueba("fallo provocado tras insertar la 2.ª partida nueva");
                     }
                 }
-                if (fallarAntesDelCommit) {                  // por si el lote trae menos de 2 nuevas
+                if (fallarAntesDelCommit) {                  // por si el lote tiene menos de 2 nuevas
                     throw new FalloDePrueba("fallo provocado antes de guardar el resumen");
                 }
                 resumenDao.insertar(con, cont);
-                con.commit();                                // CONFIRMAR
+                con.commit();                                // se confirma todo junto
             } catch (SQLException | RuntimeException e) {
                 try {
-                    con.rollback();                          // REVERTIR
+                    con.rollback();                          // se deshace todo lo de esta transacción
                 } catch (SQLException errorRollback) {
-                    e.addSuppressed(errorRollback);          // se conserva la causa original
+                    e.addSuppressed(errorRollback);          // así no pierdo el error original
                 }
                 throw new ErrorBaseDatos("No se ha guardado el lote: se ha hecho ROLLBACK, así que no se ha "
                         + "guardado ninguna partida nueva ni su resumen (causa: " + e.getMessage() + ")", e);
             }
-        } catch (SQLException e) {                           // al preparar o cerrar la conexión
+        } catch (SQLException e) {                           // fallo al preparar o cerrar la conexión
             throw ErrorBaseDatos.desde(e, "el lote de partidas");
         }
     }
 
-    // ---------- Utilidades ----------
+    // ---------- Métodos de ayuda ----------
 
     private static Incidencia conflicto(String archivo, int numero, String clave) {
         return new Incidencia(archivo, numero, clave, Motivo.CONFLICTO,
                 "ya existe con otro contenido; se conserva el registro anterior");
     }
 
+    /** Saco la clave de un campeón rechazado para el informe, si se puede. */
     private static String claveCampeon(FilaCsv fila) {
         String id = fila.valores().get("idCampeon");
         return id == null || id.isBlank() ? null : id.strip();
     }
 
+    /** Lo mismo para una partida rechazada: "EUW/P001" o null. */
     private static String clavePartida(Object registro) {
         if (registro instanceof JSONObject o
                 && o.opt("servidor") instanceof String servidor && !servidor.isBlank()

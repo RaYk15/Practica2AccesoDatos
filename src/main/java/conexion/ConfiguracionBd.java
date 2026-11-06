@@ -8,8 +8,9 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 /**
- * Datos de conexión leídos de config/bd.properties.
- * La contraseña no está en el código: está en ese archivo, que no se entrega.
+ * Datos para conectarse a PostgreSQL, leídos de config/bd.properties.
+ * La contraseña no está escrita en el código: está en ese archivo, que no se entrega
+ * (está en el .gitignore). Lo que se entrega es bd.example.properties.
  */
 public record ConfiguracionBd(String url, String usuario, String contrasena) {
 
@@ -39,14 +40,14 @@ public record ConfiguracionBd(String url, String usuario, String contrasena) {
     private static String obligatoria(Properties p, String clave, Path archivo) throws ErrorConexion {
         String valor = p.getProperty(clave);
         if (valor == null || valor.isBlank()) {
-            throw new ErrorConexion("Falta «" + clave + "» en " + archivo);
+            throw new ErrorConexion("Falta '" + clave + "' en " + archivo);
         }
         return valor.strip();
     }
 
     /**
-     * Un record imprime TODOS sus campos en toString(). Se redefine para que
-     * la contraseña no aparezca nunca si alguien imprime la configuración.
+     * Un record imprime todos sus campos en el toString(), contraseña incluida.
+     * Lo sobrescribo para que la contraseña nunca salga por pantalla.
      */
     @Override
     public String toString() {
