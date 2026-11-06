@@ -51,7 +51,7 @@ mvn clean package
 java -jar target/p2-lol.jar
 ```
 
-Sin argumentos se abre el menú. Si las tildes salen mal en la consola, antes hay que poner `chcp 65001`.
+Ejecutar el comando sin argumentos abre el menú, más cómodo de usar en mi opinión.
 
 ## Comandos
 
@@ -81,7 +81,7 @@ transacción: o se guarda todo o nada.
 ## Dónde se comprueba cada regla
 
 Casi todas las reglas están dos veces: en Java, para dar un mensaje claro y clasificar el registro,
-y en la base, para que no se pueda guardar nada mal aunque se entre por otro lado (por ejemplo desde `psql`).
+y en la base de datos, para que no se pueda guardar nada mal aunque se entre por otro lado (por ejemplo desde `psql`).
 
 | Regla | Java | Base de datos |
 |---|---|---|
