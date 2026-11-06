@@ -1,0 +1,21 @@
+# secretitos
+.env
+config/bd.properties
+
+# cosas que se generan al compilar
+target/
+dependency-reduced-pom.xml
+lab/
+*.db
+*.sqlite
+*.log
+
+# movidas de idea
+.idea/
+*.iml
+out/
+
+# sistema operativo
+.DS_Store
+Thumbs.db
+desktop.ini
